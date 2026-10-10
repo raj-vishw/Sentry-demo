@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /dashboard
+Disallow: /teams
+Disallow: /profile
+Disallow: /admin
+Disallow: /writeups/create
+Disallow: /writeups/*/edit
+Allow: /

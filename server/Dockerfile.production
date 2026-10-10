@@ -1,0 +1,37 @@
+# Production image — compiles TypeScript ahead of time and runs the plain
+# compiled output, with no dev dependencies and no source bind-mount (unlike
+# ./Dockerfile, which is dev-only — see its own header comment).
+#
+# Build context is the REPO ROOT, not ./server — this image also serves
+# the repo-root docs/ folder (see server/src/services/docs.service.ts), so
+# it needs to COPY a path outside ./server. Build with:
+#   docker build -f server/Dockerfile.production .
+# (docker-compose.production.yml already does this.)
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY server/package*.json ./
+RUN npm ci
+COPY server/tsconfig.json ./
+COPY server/src ./src
+RUN npm run build
+
+FROM node:22-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV DOCS_DIR=/app/docs
+
+COPY server/package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=builder /app/dist ./dist
+COPY docs ./docs
+
+# `node:22-alpine` ships a non-root `node` user (uid 1000) — reused rather
+# than creating a new one. `uploads/` must be writable by it: the app
+# creates this directory itself at startup (config/uploads.ts), so it just
+# needs to be owned by the right user ahead of time.
+RUN mkdir -p uploads && chown -R node:node /app
+USER node
+
+EXPOSE 4000
+CMD ["node", "dist/server.js"]

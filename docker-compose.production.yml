@@ -1,0 +1,82 @@
+# Production-shaped stack for sentry-demo — builds the production
+# Dockerfiles (nginx-served static frontend + compiled backend). Nothing
+# here is a complete deployment on its own (no TLS termination) — see
+# README.md's deployment checklist for what's still needed. No secrets are
+# hardcoded: every sensitive value is read from the environment, so supply
+# them via a real `.env` file at this repo's root (never committed — see
+# .env.example) or your platform's secret manager before running this.
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - sentry_demo_mongo_data:/data/db
+    # No `ports:` mapping to the host — only reachable by other services
+    # on this compose network.
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      # Repo root, not ./server — the image also COPYs the repo-root docs/
+      # folder (see server/Dockerfile.production's header comment).
+      context: .
+      dockerfile: server/Dockerfile.production
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/sentry-demo
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CLIENT_URL: ${CLIENT_URL:?CLIENT_URL must be set, e.g. https://demo.sentry.example}
+      ADMIN_ROUTE_PREFIX: ${ADMIN_ROUTE_PREFIX:?ADMIN_ROUTE_PREFIX must be set}
+      DOCS_DIR: /app/docs
+      DEMO_DB_CONFIRMATION: ${DEMO_DB_CONFIRMATION:?DEMO_DB_CONFIRMATION must be set — see .env.example}
+      DEMO_ADMIN_USERNAME: demo-admin
+      DEMO_ADMIN_EMAIL: demo-admin@sentry-demo.example
+      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:?DEMO_ADMIN_PASSWORD must be set}
+      DEMO_USER_USERNAME: demo-player
+      DEMO_USER_EMAIL: demo-player@sentry-demo.example
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:?DEMO_USER_PASSWORD must be set}
+    volumes:
+      - sentry_demo_uploads_data:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', "node -e \"fetch('http://localhost:4000/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.production
+      # Must match the backend's ADMIN_ROUTE_PREFIX above — baked into the
+      # static bundle at build time, so changing it later requires
+      # rebuilding this image, not just restarting the container.
+      args:
+        VITE_ADMIN_ROUTE_PREFIX: ${ADMIN_ROUTE_PREFIX:?ADMIN_ROUTE_PREFIX must be set}
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:80']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  sentry_demo_mongo_data:
+  sentry_demo_uploads_data:

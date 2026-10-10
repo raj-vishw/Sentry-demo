@@ -1,0 +1,73 @@
+# Dev stack for sentry-demo — bind-mounted source, hardcoded dev-only
+# placeholder secrets (never used for the production compose file). Ports
+# are deliberately distinct from ctf-platform's own docker-compose.yml so
+# both stacks can run simultaneously on the same machine without conflict.
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - '27018:27017'
+    volumes:
+      - sentry_demo_mongo_data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./server
+    restart: unless-stopped
+    ports:
+      - '4001:4000'
+    environment:
+      PORT: 4000
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongodb:27017/sentry-demo
+      JWT_SECRET: dev-only-sentry-demo-access-secret-change-me
+      JWT_REFRESH_SECRET: dev-only-sentry-demo-refresh-secret-change-me
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      CLIENT_URL: http://localhost:5174
+      ADMIN_ROUTE_PREFIX: demo-ops
+      DOCS_DIR: /app/docs
+      DEMO_DB_CONFIRMATION: yes-this-is-the-demo-database
+      DEMO_ADMIN_USERNAME: demo-admin
+      DEMO_ADMIN_EMAIL: demo-admin@sentry-demo.example
+      DEMO_ADMIN_PASSWORD: SentryDemo!Admin2026
+      DEMO_USER_USERNAME: demo-player
+      DEMO_USER_EMAIL: demo-player@sentry-demo.example
+      DEMO_USER_PASSWORD: SentryDemo!Player2026
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - sentry_demo_uploads_data:/app/uploads
+      - ./docs:/app/docs:ro
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', "node -e \"fetch('http://localhost:4000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build: ./client
+    restart: unless-stopped
+    ports:
+      - '5174:5173'
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:4000
+      VITE_ADMIN_ROUTE_PREFIX: demo-ops
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  sentry_demo_mongo_data:
+  sentry_demo_uploads_data:

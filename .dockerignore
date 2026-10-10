@@ -1,0 +1,16 @@
+# Used for the backend's production build (docker-compose.production.yml
+# widens its context to the repo root so it can COPY docs/ — see
+# server/Dockerfile.production). Keeps that build context small and keeps
+# secrets out of it; client/ is excluded entirely since the backend image
+# never needs it (the frontend build uses its own context: ./client,
+# governed by client/.dockerignore, not this file).
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+*.log
+.git
+client
+uploads
