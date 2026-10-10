@@ -18,6 +18,13 @@ export default defineConfig({
     sourcemap: false,
   },
   server: {
+    // Pinned, not left to Vite's "pick another port if taken" default —
+    // this is the demo instance and must always be 5174, strictly, so it
+    // never collides with (or silently drifts onto) the main sentry
+    // instance's 5173. If 5174 is already taken, this fails loudly
+    // instead of moving to 5175/5176/...
+    port: 5174,
+    strictPort: true,
     proxy: {
       // Makes the browser see the API as same-origin, which is what lets
       // the refresh-token cookie work with SameSite=Lax in dev without

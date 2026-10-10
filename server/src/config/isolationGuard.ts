@@ -3,12 +3,16 @@ import { logger } from '../utils/logger.js';
 
 /**
  * Substrings that, if found anywhere in a lowercased MONGODB_URI, mean
- * "this looks like it could be a real/managed database, not a
- * dedicated throwaway demo one" — catches an accidentally copy-pasted
- * production connection string before anything touches it. Not
- * exhaustive (no denylist can be), just a cheap, loud trip-wire.
+ * "this looks like the main Sentry repo's own production database" —
+ * catches an accidentally copy-pasted production connection string
+ * before anything touches it. Deliberately NOT a blanket ban on managed/
+ * Atlas connection strings in general (`mongodb+srv://`, `.mongodb.net`)
+ * — a dedicated, demo-only Atlas cluster is a completely legitimate way
+ * to run this deployment, and banning the whole protocol would block it.
+ * This lists the SPECIFIC known main-repo cluster identifier instead.
+ * Not exhaustive (no denylist can be), just a cheap, loud trip-wire.
  */
-const PRODUCTION_URI_DENYLIST = ['mongodb+srv://', '.mongodb.net', 'ctf-platform'];
+const PRODUCTION_URI_DENYLIST = ['cluster0.qvnxsi2.mongodb.net', 'ctf-platform'];
 
 /**
  * Not a secret — its one valid value is published in .env.example's

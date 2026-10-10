@@ -2,20 +2,15 @@
 # placeholder secrets (never used for the production compose file). Ports
 # are deliberately distinct from ctf-platform's own docker-compose.yml so
 # both stacks can run simultaneously on the same machine without conflict.
+#
+# MongoDB is a dedicated external Atlas cluster, not a bundled local
+# container — there is no `mongodb` service here. Set MONGODB_URI below
+# (or override it in a sibling .env this compose file reads) to point at
+# that cluster's own database, e.g.
+#   mongodb+srv://<user>:<pass>@<cluster-host>/sentry-demo?appName=<app>
+# Note the `/sentry-demo` path segment — without an explicit database
+# name, the driver silently defaults to Atlas's own `test` database.
 services:
-  mongodb:
-    image: mongo:7
-    restart: unless-stopped
-    ports:
-      - '27018:27017'
-    volumes:
-      - sentry_demo_mongo_data:/data/db
-    healthcheck:
-      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build: ./server
     restart: unless-stopped
@@ -24,7 +19,7 @@ services:
     environment:
       PORT: 4000
       NODE_ENV: development
-      MONGODB_URI: mongodb://mongodb:27017/sentry-demo
+      MONGODB_URI: ${MONGODB_URI:?MONGODB_URI must be set — see this file's header comment}
       JWT_SECRET: dev-only-sentry-demo-access-secret-change-me
       JWT_REFRESH_SECRET: dev-only-sentry-demo-refresh-secret-change-me
       JWT_ACCESS_EXPIRES_IN: 15m
@@ -33,20 +28,17 @@ services:
       ADMIN_ROUTE_PREFIX: demo-ops
       DOCS_DIR: /app/docs
       DEMO_DB_CONFIRMATION: yes-this-is-the-demo-database
-      DEMO_ADMIN_USERNAME: demo-admin
-      DEMO_ADMIN_EMAIL: demo-admin@sentry-demo.example
-      DEMO_ADMIN_PASSWORD: SentryDemo!Admin2026
-      DEMO_USER_USERNAME: demo-player
-      DEMO_USER_EMAIL: demo-player@sentry-demo.example
-      DEMO_USER_PASSWORD: SentryDemo!Player2026
+      DEMO_ADMIN_USERNAME: admin
+      DEMO_ADMIN_EMAIL: admin@sentry-demo.example
+      DEMO_ADMIN_PASSWORD: admin
+      DEMO_USER_USERNAME: user
+      DEMO_USER_EMAIL: user@sentry-demo.example
+      DEMO_USER_PASSWORD: user
     volumes:
       - ./server:/app
       - /app/node_modules
       - sentry_demo_uploads_data:/app/uploads
       - ./docs:/app/docs:ro
-    depends_on:
-      mongodb:
-        condition: service_healthy
     healthcheck:
       test: ['CMD-SHELL', "node -e \"fetch('http://localhost:4000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 15s
@@ -58,7 +50,7 @@ services:
     build: ./client
     restart: unless-stopped
     ports:
-      - '5174:5173'
+      - '5174:5174'
     environment:
       VITE_API_PROXY_TARGET: http://backend:4000
       VITE_ADMIN_ROUTE_PREFIX: demo-ops
@@ -69,5 +61,4 @@ services:
       - backend
 
 volumes:
-  sentry_demo_mongo_data:
   sentry_demo_uploads_data:

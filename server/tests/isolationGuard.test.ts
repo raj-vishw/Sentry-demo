@@ -33,14 +33,23 @@ describe('isolationGuard', () => {
     expect(checkSafeToModifyDatabase().safe).toBe(false);
   });
 
-  it('fails when MONGODB_URI matches a denylisted pattern, even with a correct confirmation var', () => {
+  it('fails when MONGODB_URI matches the main repo\'s specific production cluster, even with a correct confirmation var', () => {
     process.env.DEMO_DB_CONFIRMATION = 'yes-this-is-the-demo-database';
     const original = env.MONGODB_URI;
-    env.MONGODB_URI = 'mongodb+srv://user:pass@cluster0.mongodb.net/prod';
+    env.MONGODB_URI = 'mongodb+srv://user:pass@cluster0.qvnxsi2.mongodb.net/prod';
     const result = checkSafeToModifyDatabase();
     env.MONGODB_URI = original;
     expect(result.safe).toBe(false);
     expect(result.reason).toMatch(/denylisted/);
+  });
+
+  it('allows a different, dedicated Atlas/mongodb+srv cluster — the protocol itself is not denylisted', () => {
+    process.env.DEMO_DB_CONFIRMATION = 'yes-this-is-the-demo-database';
+    const original = env.MONGODB_URI;
+    env.MONGODB_URI = 'mongodb+srv://demo-user:demo-pass@some-other-cluster.mongodb.net/sentry-demo';
+    const result = checkSafeToModifyDatabase();
+    env.MONGODB_URI = original;
+    expect(result.safe).toBe(true);
   });
 
   it('passes again once the confirmation var is restored and the URI is back to normal', () => {

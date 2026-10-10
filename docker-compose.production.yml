@@ -5,20 +5,12 @@
 # hardcoded: every sensitive value is read from the environment, so supply
 # them via a real `.env` file at this repo's root (never committed — see
 # .env.example) or your platform's secret manager before running this.
+#
+# MongoDB is a dedicated external Atlas cluster, not a bundled local
+# container — there is no `mongodb` service here. MONGODB_URI must
+# include an explicit database name (e.g. `/sentry-demo`) — without one,
+# the driver silently defaults to Atlas's own `test` database.
 services:
-  mongodb:
-    image: mongo:7
-    restart: unless-stopped
-    volumes:
-      - sentry_demo_mongo_data:/data/db
-    # No `ports:` mapping to the host — only reachable by other services
-    # on this compose network.
-    healthcheck:
-      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build:
       # Repo root, not ./server — the image also COPYs the repo-root docs/
@@ -29,7 +21,7 @@ services:
     environment:
       PORT: 4000
       NODE_ENV: production
-      MONGODB_URI: mongodb://mongodb:27017/sentry-demo
+      MONGODB_URI: ${MONGODB_URI:?MONGODB_URI must be set to the dedicated Atlas cluster's connection string, including a database name}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
       JWT_ACCESS_EXPIRES_IN: 15m
@@ -38,17 +30,16 @@ services:
       ADMIN_ROUTE_PREFIX: ${ADMIN_ROUTE_PREFIX:?ADMIN_ROUTE_PREFIX must be set}
       DOCS_DIR: /app/docs
       DEMO_DB_CONFIRMATION: ${DEMO_DB_CONFIRMATION:?DEMO_DB_CONFIRMATION must be set — see .env.example}
-      DEMO_ADMIN_USERNAME: demo-admin
-      DEMO_ADMIN_EMAIL: demo-admin@sentry-demo.example
-      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:?DEMO_ADMIN_PASSWORD must be set}
-      DEMO_USER_USERNAME: demo-player
-      DEMO_USER_EMAIL: demo-player@sentry-demo.example
-      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:?DEMO_USER_PASSWORD must be set}
+      # Deliberately fixed, predefined, published credentials — this is a
+      # public demo, not a real account; see README.md/SECURITY.md.
+      DEMO_ADMIN_USERNAME: admin
+      DEMO_ADMIN_EMAIL: admin@sentry-demo.example
+      DEMO_ADMIN_PASSWORD: admin
+      DEMO_USER_USERNAME: user
+      DEMO_USER_EMAIL: user@sentry-demo.example
+      DEMO_USER_PASSWORD: user
     volumes:
       - sentry_demo_uploads_data:/app/uploads
-    depends_on:
-      mongodb:
-        condition: service_healthy
     healthcheck:
       test: ['CMD-SHELL', "node -e \"fetch('http://localhost:4000/api/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 15s
@@ -78,5 +69,4 @@ services:
       retries: 5
 
 volumes:
-  sentry_demo_mongo_data:
   sentry_demo_uploads_data:

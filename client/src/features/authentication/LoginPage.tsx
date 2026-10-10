@@ -82,8 +82,8 @@ export function LoginPage() {
 
         {import.meta.env.DEV && (
           <p className="text-center font-mono text-[11px] text-[var(--color-text-muted)]">
-            Dev seed: admin@dev.local / DevAdmin123! — run{' '}
-            <code className="text-[var(--color-text-secondary)]">npm run seed</code> in server/ to create it.
+            Demo seed: admin / admin (or user / user) — run{' '}
+            <code className="text-[var(--color-text-secondary)]">npm run seed:demo</code> in server/ to create them.
           </p>
         )}
       </form>

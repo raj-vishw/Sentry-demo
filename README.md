@@ -33,14 +33,17 @@ deployed and operated completely independently. See [Architecture](#architecture
 These are **intentionally public, documented** credentials — not secrets.
 Anyone can use them; don't treat anything you do here as private.
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | `demo-admin@sentry-demo.example` | `SentryDemo!Admin2026` |
-| Player | `demo-player@sentry-demo.example` | `SentryDemo!Player2026` |
+| Role | Username | Password | Email |
+|---|---|---|---|
+| Admin | `admin` | `admin` | `admin@sentry-demo.example` |
+| Player | `user` | `user` | `user@sentry-demo.example` |
 
-(These are the values in `server/.env.example` — a real deployment can
-change them before seeding, see `server/.env.example`'s `DEMO_ADMIN_*`/
-`DEMO_USER_*` variables.)
+Deliberately simple and memorable — the whole point of a public demo is
+that anyone can log in instantly without having to look up or copy a
+credential. (These are fixed directly in both compose files; a bare-metal
+run reads them from `server/.env.example`'s `DEMO_ADMIN_*`/`DEMO_USER_*`
+variables, which a real redeployment under your own identities could
+change.)
 
 You can also register your own throwaway account — registration is open
 by default, same as a fresh self-hosted Sentry instance.
@@ -69,10 +72,20 @@ cd server && npm install && cp .env.example .env   # fill in real values, see be
 cd ../client && npm install && cp .env.example .env
 ```
 
+Either way, `MONGODB_URI` must point at a dedicated cluster for this demo
+— a local MongoDB is fine for quick local testing, but there's no bundled
+`mongodb` container in either compose file; a dedicated external Atlas
+(or other managed) cluster is the intended setup. If using
+`mongodb+srv://`, include an explicit database name in the path (e.g.
+`/sentry-demo`) or the driver silently defaults to Atlas's own `test`
+database.
+
 Then either run both dev servers directly (`npm run dev` in each
-directory) against a local MongoDB, or use the dev Docker Compose stack:
+directory), or use the dev Docker Compose stack (reads `MONGODB_URI`
+from a root-level `.env` — see `.env.example`):
 
 ```bash
+cp .env.example .env   # set MONGODB_URI
 docker compose up --build -d
 docker compose exec backend npm run seed:demo
 ```
@@ -140,10 +153,11 @@ docker compose -f docker-compose.production.yml up -d --build
 docker compose -f docker-compose.production.yml exec backend npm run seed:demo
 ```
 
-MongoDB is never exposed to the host; uploaded-file storage and MongoDB
-data each live in their own named Docker volume
-(`sentry_demo_mongo_data`, `sentry_demo_uploads_data`), independent from
-any other Sentry deployment's volumes.
+MongoDB is a dedicated external Atlas (or any managed/self-hosted)
+cluster — there's no local `mongodb` container or volume in either
+compose file. Uploaded-file storage lives in its own named Docker volume
+(`sentry_demo_uploads_data`), independent from any other Sentry
+deployment's volumes.
 
 ## Deployment checklist for a real domain
 
