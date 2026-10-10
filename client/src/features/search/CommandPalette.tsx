@@ -41,7 +41,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const { data: challengeResult } = useQuery({
     queryKey: ['challenges', 'palette-search', debouncedQuery],
     queryFn: () => challengeService.list({ search: debouncedQuery || undefined, limit: 6 }),
-    enabled: open,
+    enabled: open && isAuthenticated,
   });
   const challenges = challengeResult?.challenges;
 
@@ -56,30 +56,35 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
 
   const results = useMemo<ResultItem[]>(() => {
     const q = query.trim().toLowerCase();
-    // Mounted globally, even for logged-out visitors — an authenticated
-    // visitor jumps into the OS window (/app/...), an unauthenticated one
-    // goes to the equivalent public browsing page (same path, no prefix).
-    const challengesBase = isAuthenticated ? `${appBasePath}/challenges` : '/challenges';
+    // This demo has no public browsing at all when logged out (see
+    // app/router/index.tsx) — mirror appResults below and only surface
+    // these when authenticated, so a logged-out visitor on the login
+    // page never gets a search result pointing at a now-removed
+    // public page.
+    const challengesBase = `${appBasePath}/challenges`;
 
-    const categoryResults: ResultItem[] = CATEGORY_LIST.filter(
-      (c) => !q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q),
-    ).map((c) => ({
-      id: `cat-${c.id}`,
-      group: 'Concepts',
-      label: c.name,
-      sublabel: c.description,
-      onSelect: () => navigate(`${challengesBase}?category=${c.id}`),
-    }));
+    const categoryResults: ResultItem[] = isAuthenticated
+      ? CATEGORY_LIST.filter(
+          (c) => !q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q),
+        ).map((c) => ({
+          id: `cat-${c.id}`,
+          group: 'Concepts',
+          label: c.name,
+          sublabel: c.description,
+          onSelect: () => navigate(`${challengesBase}?category=${c.id}`),
+        }))
+      : [];
 
     // Already backend-filtered by debouncedQuery — no client-side re-filter.
-    const challengeResults: ResultItem[] = (challenges ?? [])
-      .map((c) => ({
-        id: `chal-${c.id}`,
-        group: 'Challenges',
-        label: c.title,
-        sublabel: `${c.category} · ${DIFFICULTY_META[c.difficulty].label}`,
-        onSelect: () => navigate(`${challengesBase}/${c.slug}`),
-      }));
+    const challengeResults: ResultItem[] = isAuthenticated
+      ? (challenges ?? []).map((c) => ({
+          id: `chal-${c.id}`,
+          group: 'Challenges',
+          label: c.title,
+          sublabel: `${c.category} · ${DIFFICULTY_META[c.difficulty].label}`,
+          onSelect: () => navigate(`${challengesBase}/${c.slug}`),
+        }))
+      : [];
 
     const appResults: ResultItem[] = isAuthenticated
       ? listApps({ isAdmin: role === 'admin' })
