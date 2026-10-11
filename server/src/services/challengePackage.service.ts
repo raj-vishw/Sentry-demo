@@ -68,7 +68,11 @@ export function validateEntries(entries: ZipEntryMeta[]): ZipEntryMeta[] {
 }
 
 async function parseManifest(buffer: Buffer): Promise<ChallengePackageManifest> {
-  const extracted = await extractMatchingEntries(buffer, (name) => name === MANIFEST_ENTRY_NAME);
+  const extracted = await extractMatchingEntries(
+    buffer,
+    (name) => name === MANIFEST_ENTRY_NAME,
+    MAX_PACKAGE_EXTRACTED_BYTES,
+  );
   const manifestBytes = extracted.get(MANIFEST_ENTRY_NAME);
   if (!manifestBytes) {
     throw AppError.validation(`Archive is missing a root-level ${MANIFEST_ENTRY_NAME}.`);
@@ -126,8 +130,10 @@ export async function importChallenge(adminId: string, archiveBuffer: Buffer, fl
   crossCheckFiles(manifest, realEntries);
 
   const whitelistedFileNames = new Set(manifest.files.map((f) => path.posix.normalize(f)));
-  const fileBuffers = await extractMatchingEntries(archiveBuffer, (name) =>
-    whitelistedFileNames.has(path.posix.normalize(name)),
+  const fileBuffers = await extractMatchingEntries(
+    archiveBuffer,
+    (name) => whitelistedFileNames.has(path.posix.normalize(name)),
+    MAX_PACKAGE_EXTRACTED_BYTES,
   );
 
   const uploaded = await Promise.all(

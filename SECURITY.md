@@ -59,7 +59,12 @@ was needed:
   as in the main Sentry repository.
 - Duplicate-solve protection is a database-level unique index, not just
   an application check — survives a race condition.
-- All 15 seeded challenges are `STATIC` — solvable entirely from the text
+- Admin challenge-package import enforces a hard cap on actual
+  decompressed bytes during extraction (not just each entry's
+  self-reported declared size) — closed during an OWASP Top 10:2025
+  audit pass (2026-10); see the main repo's `SECURITY.md` for details,
+  since this code path is shared verbatim with that repo.
+- All seeded challenges are `STATIC` — solvable entirely from the text
   provided, no live service to attack. No `INTERACTIVE`/`HYBRID`
   challenge is seeded here, because this codebase cannot actually run one
   yet (see docs/about-this-demo.md) — this demo never claims otherwise.

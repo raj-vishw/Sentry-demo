@@ -61,9 +61,11 @@ export async function listZipEntries(buffer: Buffer): Promise<ZipEntryMeta[]> {
 export async function extractMatchingEntries(
   buffer: Buffer,
   predicate: (fileName: string) => boolean,
+  maxTotalBytes = Infinity,
 ): Promise<Map<string, Buffer>> {
   const zipfile = await openZip(buffer);
   const result = new Map<string, Buffer>();
+  let totalBytes = 0;
   return new Promise((resolve, reject) => {
     zipfile.on('entry', (entry: Entry) => {
       if (/\/$/.test(entry.fileName) || !predicate(entry.fileName)) {
@@ -76,7 +78,20 @@ export async function extractMatchingEntries(
           return;
         }
         const chunks: Buffer[] = [];
-        stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+        stream.on('data', (chunk: Buffer) => {
+          totalBytes += chunk.length;
+          // An entry's declared uncompressedSize is just metadata the
+          // archive itself controls — this caps actual decompressed bytes
+          // regardless of what any entry claims upfront, so a crafted
+          // mismatch between declared and real size can't inflate memory
+          // past the caller's limit.
+          if (totalBytes > maxTotalBytes) {
+            stream.destroy();
+            reject(new Error('Archive is too large once extracted.'));
+            return;
+          }
+          chunks.push(chunk);
+        });
         stream.on('error', reject);
         stream.on('end', () => {
           result.set(entry.fileName, Buffer.concat(chunks));
