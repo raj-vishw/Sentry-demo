@@ -18,7 +18,7 @@ needs to happen before that's real).
 |---|---|---|
 | Purpose | Self-hosted CTF platform, any competition | A single, standing, public demo instance |
 | Accounts | Self-serve registration + setup wizard | Two published, documented accounts; open registration also works |
-| Challenges | You bring your own | 15 original, fictional, `STATIC`-only challenges, seeded |
+| Challenges | You bring your own | 12 original, fictional, `STATIC`-only challenges, seeded |
 | Admin console | Full, for your own operators | Full, but confined to this demo's own isolated database |
 | Data lifecycle | Yours to manage | Resets on demand/schedule back to a known-good baseline |
 | Interactive challenges | Data model/API exist, no runtime yet | Not used at all — every seeded challenge is `STATIC` |
@@ -124,8 +124,8 @@ database *is* the demo:
 npm run seed:demo    # inside server/, or: docker compose exec backend npm run seed:demo
 ```
 
-Wipes every collection and recreates: 5 categories, 15 challenges (3 each
-across web/crypto/forensics/reverse-engineering/OSINT, all `STATIC`), the
+Wipes every collection and recreates: 4 categories, 12 challenges (3 each
+across crypto/forensics/reverse-engineering/OSINT, all `STATIC`), the
 2 published demo accounts, and default platform/competition branding.
 Refuses to run unless `DEMO_DB_CONFIRMATION` is set correctly and
 `MONGODB_URI` doesn't match a known-production-looking pattern — see

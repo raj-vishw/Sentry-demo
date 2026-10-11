@@ -39,9 +39,9 @@ describe('seedDemo idempotency', () => {
     const slugsAfterFirst = (await Challenge.find().select('slug').lean()).map((c) => c.slug).sort();
 
     expect(usersAfterFirst).toBe(2);
-    expect(categoriesAfterFirst).toBe(5);
-    expect(challengesAfterFirst).toBe(15);
-    expect(hintsAfterFirst).toBe(15); // every seeded challenge has exactly one hint
+    expect(categoriesAfterFirst).toBe(4);
+    expect(challengesAfterFirst).toBe(12);
+    expect(hintsAfterFirst).toBe(12); // every seeded challenge has exactly one hint
 
     await runSeed();
 

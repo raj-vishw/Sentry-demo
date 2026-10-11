@@ -9,7 +9,7 @@ export function ChallengeDetailPage() {
   useDocumentTitle('Challenge');
 
   return (
-    <PageContainer className="flex flex-col gap-5">
+    <PageContainer className="flex flex-col gap-6">
       <Link
         to="/challenges"
         className="inline-flex w-fit items-center gap-1.5 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"

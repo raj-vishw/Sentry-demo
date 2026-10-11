@@ -143,7 +143,11 @@ export interface ChallengeListParams {
 }
 
 function buildQuery(params: ChallengeListParams): string {
-  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== '');
+  // `difficulty` is lowercase in frontend filter state but the backend's
+  // validator only accepts the uppercase enum — without this conversion
+  // every difficulty-filtered request 400s.
+  const normalized = { ...params, difficulty: params.difficulty ? DIFFICULTY_TO_BACKEND[params.difficulty] : undefined };
+  const entries = Object.entries(normalized).filter(([, v]) => v !== undefined && v !== '');
   if (entries.length === 0) return '';
   return '?' + new URLSearchParams(entries.map(([k, v]) => [k, String(v)])).toString();
 }

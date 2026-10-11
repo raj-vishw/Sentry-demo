@@ -29,9 +29,13 @@ export default defineConfig({
       // Makes the browser see the API as same-origin, which is what lets
       // the refresh-token cookie work with SameSite=Lax in dev without
       // HTTPS. Target is overridable for Docker Compose, where the backend
-      // is reachable as `backend`, not `localhost`.
+      // is reachable as `backend`, not `localhost`. 4001, not 4000 — the
+      // main sentry app's backend already owns 4000 on the host; keeping
+      // this distinct is what stops the two from colliding when both run
+      // bare-metal at once (Docker is unaffected: ports 4000/4001 there are
+      // container-internal and don't collide with the host or each other).
       '/api': {
-        target: process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:4000',
+        target: process.env.VITE_API_PROXY_TARGET ?? 'http://localhost:4001',
         changeOrigin: true,
       },
     },

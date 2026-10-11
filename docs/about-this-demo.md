@@ -11,8 +11,8 @@ deployment.
 
 Everything you can do is backed by a real, independent instance of the
 same backend/frontend code as the main project: registering or logging
-in with the published demo accounts, browsing and solving 15 original
-challenges across five categories, earning points, climbing the
+in with the published demo accounts, browsing and solving 12 original
+challenges across four categories, earning points, climbing the
 leaderboard, unlocking hints, and exploring the admin console as the
 published demo-admin account. Scores and solve state come from this
 demo's own database — nothing here is hardcoded or faked.

@@ -29,18 +29,18 @@ export function LabPanel({
 
   return (
     <GlassPanel className="overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between gap-3 px-5 py-4">
         <button
           onClick={() => setOpen(!open)}
-          className="flex flex-1 items-center gap-2 text-left"
+          className="-mx-1 flex flex-1 items-center gap-2.5 rounded-[var(--radius-md)] px-1 py-0.5 text-left transition-colors hover:bg-[var(--color-surface-elevated)]/50"
           aria-expanded={open}
         >
-          {Icon && <Icon className="size-4 text-[var(--color-accent)]" aria-hidden="true" />}
+          {Icon && <Icon className="size-4 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />}
           <span className="font-mono text-xs uppercase tracking-widest text-[var(--color-text-secondary)]">
             {title}
           </span>
           <ChevronDown
-            className={cn('size-3.5 text-[var(--color-text-muted)] transition-transform', open && 'rotate-180')}
+            className={cn('size-3.5 shrink-0 text-[var(--color-text-muted)] transition-transform', open && 'rotate-180')}
           />
         </button>
         {action}
@@ -55,7 +55,7 @@ export function LabPanel({
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-[var(--color-glass-border)] px-4 py-[var(--space-panel-y)]">
+            <div className="border-t border-[var(--color-glass-border)] px-5 py-[var(--space-panel-y)]">
               {children}
             </div>
           </motion.div>

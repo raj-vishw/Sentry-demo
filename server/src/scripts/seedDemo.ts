@@ -37,7 +37,6 @@ import { hashFlag } from '../utils/flag.js';
 import { logger } from '../utils/logger.js';
 import { updateConfig } from '../services/systemConfig.service.js';
 import { updateCompetitionConfig } from '../services/competitionConfig.service.js';
-import { webChallenges } from './seedData/challenges/web.js';
 import { cryptoChallenges } from './seedData/challenges/crypto.js';
 import { forensicsChallenges } from './seedData/challenges/forensics.js';
 import { reverseChallenges } from './seedData/challenges/reverse.js';
@@ -45,7 +44,6 @@ import { osintChallenges } from './seedData/challenges/osint.js';
 import type { DemoChallengeSpec } from './seedData/types.js';
 
 const CATEGORY_META: Record<string, { name: string; description: string; icon: string }> = {
-  web: { name: 'Web', description: 'Exploit vulnerabilities in web applications and APIs.', icon: 'globe' },
   crypto: { name: 'Crypto', description: 'Break ciphers and attack weak implementations.', icon: 'key' },
   forensics: { name: 'Forensics', description: 'Recover evidence from disks, memory, and traffic.', icon: 'fingerprint' },
   reverse: { name: 'Reverse Engineering', description: 'Disassemble binaries and reconstruct hidden logic.', icon: 'cpu' },
@@ -54,7 +52,6 @@ const CATEGORY_META: Record<string, { name: string; description: string; icon: s
 const DEMO_CATEGORY_SLUGS = Object.keys(CATEGORY_META) as (typeof CATEGORY_SLUGS)[number][];
 
 const ALL_CHALLENGES: DemoChallengeSpec[] = [
-  ...webChallenges,
   ...cryptoChallenges,
   ...forensicsChallenges,
   ...reverseChallenges,

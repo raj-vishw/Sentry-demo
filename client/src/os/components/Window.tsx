@@ -1,13 +1,10 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Minus, Square, X, Copy, LayoutGrid } from 'lucide-react';
 import { ObservatoryLoader } from '@/components/feedback/ObservatoryLoader';
 import { useWindowStore } from '../state/windowStore';
 import { getApp } from '../apps/registry';
-import { resolveAppFromPath } from '../lib/resolveApp';
-import { useAppBasePath } from '@/lib/appPath';
 import { ContextMenu, type ContextMenuState } from './ContextMenu';
 import type { Point, Size, SnapZone, WindowInstance } from '../types';
 import { cn } from '@/lib/utils';
@@ -88,9 +85,6 @@ export function Window({
   const moveWindowToWorkspace = useWindowStore((s) => s.moveWindowToWorkspace);
   const reduceMotion = usePrefersReducedMotion();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const location = useLocation();
-  const navigate = useNavigate();
-  const appBasePath = useAppBasePath();
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
 
   const isFocused = focusedId === win.id;
@@ -116,12 +110,14 @@ export function Window({
     });
   }
 
+  // Closing a window never changes the URL or opens another window — it
+  // used to redirect to the dashboard whenever the closed window's route
+  // matched the current URL, which kept popping Observatory open right
+  // after closing something else entirely (the redirect's new URL re-ran
+  // OSShell's route-sync effect, which opens whatever app that URL
+  // resolves to). Just close it.
   function handleClose() {
-    const current = resolveAppFromPath(location.pathname);
     closeWindow(win.id);
-    if (current && current.appId === win.appId && JSON.stringify(current.params) === JSON.stringify(win.params)) {
-      navigate(`${appBasePath}/dashboard`);
-    }
   }
   const contentRef = useRef<HTMLDivElement>(null);
   const [isCompact, setIsCompact] = useState(false);
