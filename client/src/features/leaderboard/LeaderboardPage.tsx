@@ -1,32 +1,36 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Tabs } from '@/components/ui/Tabs';
+import { Pagination } from '@/components/ui/Pagination';
 import { LeaderboardTable } from './components/LeaderboardTable';
 import { RankBadge } from './components/RankBadge';
 import { ObservatoryLoader } from '@/components/feedback/ObservatoryLoader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { GlassPanel } from '@/components/ui/GlassPanel';
-import { leaderboardService, type LeaderboardScope } from '@/services/leaderboardService';
-import { formatNumber } from '@/lib/utils';
+import { useLeaderboard, useTeamLeaderboard } from './hooks/useLeaderboard';
+import type { LeaderboardScope } from '@/services/leaderboardService';
+import { formatNumber, cn } from '@/lib/utils';
 import { Lock, Snowflake, Trophy, Users, Zap } from 'lucide-react';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 
 const PAGE_SIZE = 20;
 
-export function LeaderboardPage() {
+/** See ChallengesPage.tsx's matching doc comment — same hideHeader convention. */
+export function LeaderboardPage({ hideHeader = false }: { hideHeader?: boolean } = {}) {
   useDocumentTitle('Leaderboard');
   return (
-    <PageContainer className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-[var(--color-text-primary)] sm:text-3xl">
-          Leaderboard
-        </h1>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          Operators and teams ranked by total XP.
-        </p>
-      </div>
+    <PageContainer className={cn('flex flex-col gap-4', hideHeader && 'px-3 py-4 sm:px-4')}>
+      {!hideHeader && (
+        <div>
+          <h1 className="font-display text-2xl font-bold text-[var(--color-text-primary)] sm:text-3xl">
+            Leaderboard
+          </h1>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+            Operators and teams ranked by total XP.
+          </p>
+        </div>
+      )}
 
       <Tabs
         items={[
@@ -56,34 +60,9 @@ function FrozenBanner({ freezeTime }: { freezeTime: string | null }) {
   );
 }
 
-function PaginationNav({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
-  if (totalPages <= 1) return null;
-  return (
-    <nav className="flex items-center justify-center gap-2" aria-label="Pagination">
-      {Array.from({ length: totalPages }).map((_, i) => (
-        <button
-          key={i}
-          onClick={() => onChange(i + 1)}
-          aria-current={page === i + 1 ? 'page' : undefined}
-          className={`size-9 rounded-[var(--radius-md)] font-mono text-sm ${
-            page === i + 1
-              ? 'bg-[var(--color-accent)] text-[var(--color-text-inverse)]'
-              : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-elevated)]'
-          }`}
-        >
-          {i + 1}
-        </button>
-      ))}
-    </nav>
-  );
-}
-
 function LeaderboardPanel({ scope }: { scope: LeaderboardScope }) {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['leaderboard', scope, page],
-    queryFn: () => leaderboardService.getLeaderboard(scope, page, PAGE_SIZE),
-  });
+  const { data, isLoading, isError, refetch } = useLeaderboard(scope, page, PAGE_SIZE);
 
   if (isLoading) return <ObservatoryLoader label="Loading leaderboard" />;
   if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
@@ -119,17 +98,14 @@ function LeaderboardPanel({ scope }: { scope: LeaderboardScope }) {
 
       <LeaderboardTable entries={data.entries} highlightUserId={data.me?.onPage ? data.me.userId : undefined} />
 
-      <PaginationNav page={page} totalPages={data.pagination.totalPages} onChange={setPage} />
+      <Pagination page={page} totalPages={data.pagination.totalPages} onPageChange={setPage} />
     </div>
   );
 }
 
 function TeamLeaderboardPanel() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['leaderboard', 'teams', page],
-    queryFn: () => leaderboardService.getTeamLeaderboard(page, PAGE_SIZE),
-  });
+  const { data, isLoading, isError, refetch } = useTeamLeaderboard(page, PAGE_SIZE);
 
   if (isLoading) return <ObservatoryLoader label="Loading team leaderboard" />;
   if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
@@ -149,45 +125,30 @@ function TeamLeaderboardPanel() {
   return (
     <div className="flex flex-col gap-4">
       {data.frozen && <FrozenBanner freezeTime={data.freezeTime} />}
-      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-left text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
-              <th className="px-4 py-3 font-medium">Rank</th>
-              <th className="px-4 py-3 font-medium">Team</th>
-              <th className="px-4 py-3 text-right font-medium">Members</th>
-              <th className="px-4 py-3 text-right font-medium">Solved</th>
-              <th className="px-4 py-3 text-right font-medium">XP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.entries.map((entry) => (
-              <tr
-                key={entry.teamId}
-                className="border-b border-[var(--color-border)] bg-[var(--color-surface)] last:border-0 hover:bg-[var(--color-surface-hover)]"
-              >
-                <td className="px-4 py-3">
-                  <RankBadge rank={entry.rank} />
-                </td>
-                <td className="px-4 py-3 font-medium text-[var(--color-text-primary)]">{entry.name}</td>
-                <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Users className="size-3.5" /> {entry.memberCount}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">{entry.solvedCount}</td>
-                <td className="px-4 py-3 text-right font-mono font-medium text-[var(--color-accent)]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Zap className="size-3.5" /> {formatNumber(entry.xp)}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex flex-col border-t border-[var(--color-border)] font-mono text-sm">
+        {data.entries.map((entry) => (
+          <div
+            key={entry.teamId}
+            className="flex items-center gap-4 border-b border-[var(--color-border)] px-3 py-2.5 hover:bg-[var(--color-surface-hover)]"
+          >
+            <span className="w-7 shrink-0 text-xs text-[var(--color-text-muted)]">
+              {String(entry.rank).padStart(2, '0')}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[var(--color-text-primary)]">{entry.name}</span>
+            <span className="hidden shrink-0 items-center gap-1.5 text-xs text-[var(--color-text-secondary)] sm:inline-flex">
+              <Users className="size-3.5" /> {entry.memberCount}
+            </span>
+            <span className="hidden shrink-0 text-xs text-[var(--color-text-secondary)] sm:inline">
+              {entry.solvedCount} solved
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1.5 text-xs text-[var(--color-accent)]">
+              <Zap className="size-3.5" /> {formatNumber(entry.xp)}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <PaginationNav page={page} totalPages={data.pagination.totalPages} onChange={setPage} />
+      <Pagination page={page} totalPages={data.pagination.totalPages} onPageChange={setPage} />
     </div>
   );
 }

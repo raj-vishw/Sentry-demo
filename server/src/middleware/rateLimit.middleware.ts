@@ -32,10 +32,20 @@ export const apiLimiter = rateLimit({
 });
 
 // Stricter limit on auth endpoints — abuse-sensitive (credential stuffing,
-// account enumeration via registration).
+// account enumeration via registration) on the main repo, where this
+// protects real accounts with real secrets. This demo's accounts are
+// intentionally public (see LoginPage.tsx's quick-login buttons and
+// README/SECURITY.md) — there's no secret here for a strict per-IP limit
+// to protect — and the same limiter also gates /auth/refresh, which fires
+// on every page load/navigation, not just explicit logins. A real demo
+// visitor clicking "Login as user" a few times, reloading, and trying
+// both accounts can exhaust a 20-per-15-min *shared-IP* bucket (NAT,
+// corporate proxy, or just normal dev iteration) in minutes. Kept
+// nonzero, not removed, as a mild backstop against generic spam/abuse —
+// just no longer tuned for a threat model this demo doesn't have.
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 20,
+  limit: 300,
   standardHeaders: true,
   legacyHeaders: false,
   handler: rateLimitedHandler,

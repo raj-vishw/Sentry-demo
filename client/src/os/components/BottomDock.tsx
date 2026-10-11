@@ -11,6 +11,9 @@ import { ContextMenu, type ContextMenuState } from './ContextMenu';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 
+/** Chamfered (cut-corner) dock tile shape — see Window.tsx's CHAMFER constant for the same convention applied to window chrome. */
+const DOCK_TILE_CLIP = 'polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%)';
+
 export function BottomDock() {
   const navigate = useNavigate();
   const role = useAuthStore((s) => s.user?.role);
@@ -54,7 +57,7 @@ export function BottomDock() {
       onMouseLeave={() => dockAutohide && setRevealed(false)}
     >
       <motion.div
-        className="glass-panel-strong flex max-w-[94vw] items-center gap-1 overflow-x-auto rounded-[var(--radius-2xl)] px-2 py-2"
+        className="glass-panel-strong flex max-w-[94vw] items-center gap-1.5 overflow-x-auto border px-2 py-2"
         animate={reduceMotion ? { opacity: hidden ? 0 : 1 } : { y: hidden ? 56 : 0, opacity: hidden ? 0 : 1 }}
         transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         style={{ pointerEvents: hidden ? 'none' : 'auto' }}
@@ -63,7 +66,8 @@ export function BottomDock() {
           type="button"
           onClick={openPalette}
           aria-label="Application launcher"
-          className="flex size-11 items-center justify-center rounded-[var(--radius-lg)] text-[var(--color-accent)] hover:bg-[var(--color-surface-hover)]"
+          className="flex size-11 items-center justify-center text-[var(--color-accent)] hover:bg-[var(--color-surface-hover)]"
+          style={{ clipPath: DOCK_TILE_CLIP }}
         >
           <Grip className="size-5" />
         </button>
@@ -93,7 +97,8 @@ export function BottomDock() {
                 });
               }}
               aria-label={app.title}
-              className="group relative flex size-11 items-center justify-center rounded-[var(--radius-lg)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]"
+              className="group relative flex size-11 items-center justify-center text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]"
+              style={{ clipPath: DOCK_TILE_CLIP }}
             >
               <Icon className={cn('size-5', isActive && 'text-[var(--color-accent)]')} />
               {win && (

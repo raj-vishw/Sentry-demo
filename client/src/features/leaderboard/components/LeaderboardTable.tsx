@@ -1,11 +1,16 @@
 import { Link } from 'react-router-dom';
 import type { LeaderboardEntry } from '@/types';
-import { RankBadge } from './RankBadge';
 import { formatNumber, cn } from '@/lib/utils';
 import { useAppAwarePath } from '@/lib/appPath';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { Trophy } from 'lucide-react';
 
+/**
+ * "// LEADERBOARD.SYS" manifest rows — zero-padded rank, username (+ team
+ * as a muted inline suffix, not its own column), solved count, XP flush
+ * right. The current user's row gets a full border box instead of just a
+ * background tint, matching the mockup's "you" row treatment.
+ */
 export function LeaderboardTable({
   entries,
   highlightUserId,
@@ -20,48 +25,41 @@ export function LeaderboardTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--color-border)]">
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)] text-left text-xs uppercase tracking-wide text-[var(--color-text-muted)]">
-            <th className="px-4 py-3 font-medium">Rank</th>
-            <th className="px-4 py-3 font-medium">Operator</th>
-            <th className="hidden px-4 py-3 font-medium sm:table-cell">Team</th>
-            <th className="px-4 py-3 text-right font-medium">Solved</th>
-            <th className="px-4 py-3 text-right font-medium">XP</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry) => (
-            <tr
-              key={entry.userId}
+    <div className="flex flex-col border-t border-[var(--color-border)] font-mono text-sm">
+      {entries.map((entry) => {
+        const isMe = entry.userId === highlightUserId;
+        return (
+          <div
+            key={entry.userId}
+            className={cn(
+              'flex items-center gap-4 border-b border-[var(--color-border)] px-3 py-2.5 last:border-b-[var(--color-border)]',
+              isMe && 'border border-[var(--color-accent)] bg-[var(--color-accent-soft)]',
+            )}
+          >
+            <span className={cn('w-7 shrink-0 text-xs', isMe ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]')}>
+              {String(entry.rank).padStart(2, '0')}
+            </span>
+            <Link
+              to={toPath(`/profile/${entry.username}`)}
               className={cn(
-                'border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-surface-hover)]',
-                entry.userId === highlightUserId ? 'bg-[var(--color-accent-soft)]' : 'bg-[var(--color-surface)]',
+                'min-w-0 flex-1 truncate',
+                isMe ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-primary)] hover:text-[var(--color-accent)]',
               )}
             >
-              <td className="px-4 py-3">
-                <RankBadge rank={entry.rank} />
-              </td>
-              <td className="px-4 py-3 font-medium">
-                <Link
-                  to={toPath(`/profile/${entry.username}`)}
-                  className="text-[var(--color-text-primary)] hover:text-[var(--color-accent)]"
-                >
-                  {entry.username}
-                </Link>
-              </td>
-              <td className="hidden px-4 py-3 text-[var(--color-text-secondary)] sm:table-cell">
-                {entry.teamName ?? '—'}
-              </td>
-              <td className="px-4 py-3 text-right text-[var(--color-text-secondary)]">{entry.solvedCount}</td>
-              <td className="px-4 py-3 text-right font-mono font-medium text-[var(--color-accent)]">
-                {formatNumber(entry.xp)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              {entry.username}
+              {entry.teamName && (
+                <span className="ml-2 text-xs text-[var(--color-text-muted)]">· {entry.teamName}</span>
+              )}
+            </Link>
+            <span className="hidden shrink-0 text-xs text-[var(--color-text-secondary)] sm:inline">
+              {entry.solvedCount} solved
+            </span>
+            <span className={cn('shrink-0 text-xs', isMe ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-secondary)]')}>
+              {formatNumber(entry.xp)} xp
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

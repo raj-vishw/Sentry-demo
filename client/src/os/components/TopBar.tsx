@@ -15,6 +15,9 @@ import { NotificationCenter } from './NotificationCenter';
 import { Clock } from './Clock';
 import { cn } from '@/lib/utils';
 
+/** Small chamfered badge shape — workspace pills, user avatar — same angular convention as Window.tsx/BottomDock.tsx, scaled down. */
+const BADGE_CLIP = 'polygon(25% 0, 100% 0, 100% 75%, 75% 100%, 0 100%, 0 25%)';
+
 export function TopBar() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -63,11 +66,12 @@ export function TopBar() {
             aria-label={`Workspace ${i + 1}${occupied.has(i) ? ' (has windows)' : ''}`}
             aria-current={activeWorkspace === i}
             className={cn(
-              'relative rounded-full px-2.5 py-1 font-mono text-[10px] transition-colors',
+              'relative px-2.5 py-1 font-mono text-[10px] transition-colors',
               activeWorkspace === i
                 ? 'bg-[var(--color-surface-elevated)] text-[var(--color-accent)]'
                 : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]',
             )}
+            style={{ clipPath: BADGE_CLIP }}
           >
             {i + 1}
             {occupied.has(i) && activeWorkspace !== i && (
@@ -123,7 +127,8 @@ export function TopBar() {
       <div className="relative">
         <button
           onClick={() => setUserMenuOpen((o) => !o)}
-          className="flex size-8 items-center justify-center rounded-full bg-[var(--color-surface-elevated)] font-mono text-[10px] font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-hover)]"
+          className="flex size-8 items-center justify-center bg-[var(--color-surface-elevated)] font-mono text-[10px] font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-hover)]"
+          style={{ clipPath: BADGE_CLIP }}
           aria-label="User menu"
         >
           {(user?.username ?? 'OP').slice(0, 2).toUpperCase()}

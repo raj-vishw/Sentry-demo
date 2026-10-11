@@ -37,13 +37,12 @@ function renderCard(challenge: Challenge) {
 }
 
 describe('ChallengeCard', () => {
-  it('renders title, category, difficulty, points, and solve count', () => {
+  it('renders title, category, difficulty (accessibly), and points', () => {
     renderCard(baseChallenge);
     expect(screen.getByText('Shadow Login')).toBeInTheDocument();
-    expect(screen.getByText('Web')).toBeInTheDocument();
-    expect(screen.getByText('Medium')).toBeInTheDocument();
-    expect(screen.getByText('300 XP')).toBeInTheDocument();
-    expect(screen.getByText('214 solves')).toBeInTheDocument();
+    expect(screen.getByText('[Web]')).toBeInTheDocument();
+    expect(screen.getByText('Medium difficulty')).toBeInTheDocument();
+    expect(screen.getByText('300 pts')).toBeInTheDocument();
   });
 
   it('links to the challenge detail route', () => {
@@ -51,15 +50,24 @@ describe('ChallengeCard', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/challenges/shadow-login');
   });
 
-  it('shows a solved indicator only when solved', () => {
+  it('shows a solved indicator instead of points only when solved', () => {
     const { rerender } = renderCard(baseChallenge);
-    expect(screen.queryByLabelText('Solved')).not.toBeInTheDocument();
+    expect(screen.queryByText('✓ solved')).not.toBeInTheDocument();
+    expect(screen.getByText('300 pts')).toBeInTheDocument();
 
     rerender(
       <MemoryRouter>
         <ChallengeCard challenge={{ ...baseChallenge, solved: true }} />
       </MemoryRouter>,
     );
-    expect(screen.getByLabelText('Solved')).toBeInTheDocument();
+    expect(screen.getByText('✓ solved')).toBeInTheDocument();
+    expect(screen.queryByText('300 pts')).not.toBeInTheDocument();
+  });
+
+  it('shows a locked indicator and no points/solved status when locked', () => {
+    renderCard({ ...baseChallenge, locked: true });
+    expect(screen.getByLabelText('Locked')).toBeInTheDocument();
+    expect(screen.getByText('locked')).toBeInTheDocument();
+    expect(screen.queryByText('300 pts')).not.toBeInTheDocument();
   });
 });

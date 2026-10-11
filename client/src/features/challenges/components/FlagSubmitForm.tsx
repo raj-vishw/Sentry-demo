@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CheckCircle2, ChevronRight } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useSubmitFlag } from '../hooks/useSubmitFlag';
 import { useUiStore } from '@/stores/uiStore';
@@ -42,25 +42,33 @@ export function FlagSubmitForm({
   } = useForm<FlagFormValues>({ resolver: zodResolver(flagSchema) });
 
   async function onSubmit(values: FlagFormValues) {
+    onLog({ id: crypto.randomUUID(), time: nowLabel(), message: `> submit ${values.flag}`, tone: 'info' });
+    onLog({
+      id: crypto.randomUUID(),
+      time: nowLabel(),
+      message: `validating against ./${slug}...`,
+      tone: 'info',
+    });
     try {
       const response = await submitFlag.mutateAsync({ challengeId, flag: values.flag });
       if (!response.correct) {
-        onLog({ id: crypto.randomUUID(), time: nowLabel(), message: 'Incorrect flag.', tone: 'error' });
+        onLog({ id: crypto.randomUUID(), time: nowLabel(), message: '✗ incorrect flag.', tone: 'error' });
         return;
       }
       if (response.alreadySolved) {
         onLog({
           id: crypto.randomUUID(),
           time: nowLabel(),
-          message: 'Already solved — no additional points.',
+          message: 'already solved — no additional points.',
           tone: 'info',
         });
         return;
       }
+      const firstBlood = response.newAchievements.some((a) => a.type === 'FIRST_BLOOD');
       onLog({
         id: crypto.randomUUID(),
         time: nowLabel(),
-        message: `Correct — +${response.pointsAwarded} XP awarded.`,
+        message: `✓ correct — +${response.pointsAwarded} xp${firstBlood ? ' — first blood' : ''}`,
         tone: 'success',
       });
       for (const achievement of response.newAchievements) {
@@ -92,16 +100,22 @@ export function FlagSubmitForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-glass-border)] bg-[var(--color-bg)]/60 px-3.5 py-3 focus-within:border-[var(--color-accent)]/50">
-        <ChevronRight className="size-4 shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
+      <div className="flex items-center gap-2 border border-[var(--color-border-strong)] bg-[var(--color-bg)]/60 px-3.5 py-3 focus-within:border-[var(--color-accent)]">
+        <span className="shrink-0 font-mono text-sm text-[var(--color-accent)]" aria-hidden="true">
+          &gt;
+        </span>
         <input
           aria-label="Flag"
-          placeholder="submit_flag CTF{...}"
+          placeholder="enter flag..."
           className="w-full bg-transparent font-mono text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none"
           {...register('flag')}
         />
-        <Button type="submit" size="sm" isLoading={isSubmitting}>
-          Run
+        <span
+          aria-hidden="true"
+          className="h-[15px] w-[7px] shrink-0 animate-pulse-slow bg-[var(--color-accent)]"
+        />
+        <Button type="submit" size="sm" variant="outline" isLoading={isSubmitting} className="shrink-0">
+          <span aria-hidden="true">[</span>&nbsp;run&nbsp;<span aria-hidden="true">]</span>
         </Button>
       </div>
       {errors.flag && <p className="text-xs text-[var(--color-error)]">{errors.flag.message}</p>}

@@ -5,10 +5,18 @@ export type WallpaperId = 'observatory' | 'aurora' | 'minimal' | 'matrix' | 'ter
 export type AccentId = 'signal' | 'discovery' | 'amber';
 export type ThemeMode = 'dark' | 'light';
 
+/**
+ * Per-user accent preference — applied as an inline style on <html> by
+ * OSShell.tsx, which (correctly) wins over the --color-accent default in
+ * tokens.css. Keep these in sync with that default by hand: there's no
+ * single source of truth between a CSS custom property and a JS value map.
+ * "amber" here is a legacy key name repurposed as the cool alternate (the
+ * old "Living Cyber OS" cyan) now that "signal" — the default — IS amber.
+ */
 export const ACCENT_VALUES: Record<AccentId, string> = {
-  signal: '#00e5ff',
+  signal: '#ffb347',
   discovery: '#d946ef',
-  amber: '#ffb020',
+  amber: '#45d9f5',
 };
 
 interface SettingsState {

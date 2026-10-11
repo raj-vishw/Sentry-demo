@@ -79,7 +79,7 @@ export function LoginPage() {
     <AuthLayout
       title="System Access"
       subtitle="Authenticate to enter the arena and continue your campaign."
-      eyebrow="Sentry OS · Sign-in"
+      eyebrow="// sentry · sign-in"
       aside={<SystemStatusPanel />}
     >
       <div className="flex flex-col gap-5">

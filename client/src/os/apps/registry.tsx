@@ -21,12 +21,8 @@ import type { AppDefinition } from '../types';
 const DashboardPage = lazy(() =>
   import('@/features/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
-const ChallengesPage = lazy(() =>
-  import('@/features/challenges/ChallengesPage').then((m) => ({ default: m.ChallengesPage })),
-);
-const LeaderboardPage = lazy(() =>
-  import('@/features/leaderboard/LeaderboardPage').then((m) => ({ default: m.LeaderboardPage })),
-);
+const ExploreApp = lazy(() => import('./ExploreApp').then((m) => ({ default: m.ExploreApp })));
+const LeaderboardApp = lazy(() => import('./LeaderboardApp').then((m) => ({ default: m.LeaderboardApp })));
 const TeamsPage = lazy(() => import('@/features/teams/TeamsPage').then((m) => ({ default: m.TeamsPage })));
 const ProfilePage = lazy(() =>
   import('@/features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })),
@@ -49,7 +45,7 @@ const AdminConsoleApp = lazy(() => import('./AdminConsoleApp').then((m) => ({ de
 export const APP_REGISTRY: Record<string, AppDefinition> = {
   dashboard: {
     id: 'dashboard',
-    title: 'Observatory',
+    title: 'OBSERVATORY.SYS',
     icon: LayoutDashboard,
     routePattern: '/app/dashboard',
     buildPath: () => '/app/dashboard',
@@ -60,18 +56,18 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   explore: {
     id: 'explore',
-    title: 'Explore',
+    title: 'CHALLENGES.SYS',
     icon: Flag,
     routePattern: '/app/challenges',
     buildPath: () => '/app/challenges',
     defaultSize: { width: 900, height: 620 },
     minSize: { width: 420, height: 360 },
-    component: ChallengesPage,
+    component: ExploreApp,
     pinned: true,
   },
   laboratory: {
     id: 'laboratory',
-    title: 'Laboratory',
+    title: 'CHALLENGE.SYS',
     icon: ShieldCheck,
     routePattern: '/app/challenges/:slug',
     buildPath: (params) => `/app/challenges/${params.slug}`,
@@ -83,18 +79,18 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   leaderboard: {
     id: 'leaderboard',
-    title: 'Leaderboard',
+    title: 'LEADERBOARD.SYS',
     icon: Trophy,
     routePattern: '/app/leaderboard',
     buildPath: () => '/app/leaderboard',
     defaultSize: { width: 760, height: 620 },
     minSize: { width: 380, height: 360 },
-    component: LeaderboardPage,
+    component: LeaderboardApp,
     pinned: true,
   },
   teams: {
     id: 'teams',
-    title: 'Teams',
+    title: 'TEAMS.SYS',
     icon: Users,
     routePattern: '/app/teams',
     buildPath: () => '/app/teams',
@@ -104,7 +100,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   profile: {
     id: 'profile',
-    title: 'Profile',
+    title: 'PROFILE.SYS',
     icon: CircleUser,
     routePattern: '/app/profile',
     buildPath: () => '/app/profile',
@@ -117,7 +113,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   // tried first (same rule documented below for writeupCreate/writeupDetail).
   publicProfile: {
     id: 'publicProfile',
-    title: 'Operator Profile',
+    title: 'OPERATOR.SYS',
     icon: CircleUser,
     routePattern: '/app/profile/:username',
     buildPath: (params) => `/app/profile/${params.username}`,
@@ -129,7 +125,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   writeups: {
     id: 'writeups',
-    title: 'Writeups',
+    title: 'WRITEUPS.SYS',
     icon: BookOpen,
     routePattern: '/app/writeups',
     buildPath: () => '/app/writeups',
@@ -142,7 +138,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   // '/writeups/create' must be tried before the dynamic '/writeups/:slug'.
   writeupCreate: {
     id: 'writeupCreate',
-    title: 'Write a Writeup',
+    title: 'WRITEUP_NEW.SYS',
     icon: PenLine,
     routePattern: '/app/writeups/create',
     buildPath: () => '/app/writeups/create',
@@ -154,7 +150,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   writeupEdit: {
     id: 'writeupEdit',
-    title: 'Edit Writeup',
+    title: 'WRITEUP_EDIT.SYS',
     icon: PenLine,
     routePattern: '/app/writeups/:slug/edit',
     buildPath: (params) => `/app/writeups/${params.slug}/edit`,
@@ -166,7 +162,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   writeupDetail: {
     id: 'writeupDetail',
-    title: 'Writeup',
+    title: 'WRITEUP.SYS',
     icon: BookOpen,
     routePattern: '/app/writeups/:slug',
     buildPath: (params) => `/app/writeups/${params.slug}`,
@@ -178,7 +174,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   notes: {
     id: 'notes',
-    title: 'Notes',
+    title: 'NOTES.SYS',
     icon: NotebookPen,
     defaultSize: { width: 640, height: 480 },
     minSize: { width: 340, height: 300 },
@@ -186,7 +182,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   files: {
     id: 'files',
-    title: 'Files',
+    title: 'FILES.SYS',
     icon: FolderOpen,
     defaultSize: { width: 640, height: 480 },
     minSize: { width: 340, height: 300 },
@@ -194,7 +190,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   taskmanager: {
     id: 'taskmanager',
-    title: 'Task Manager',
+    title: 'TASKS.SYS',
     icon: ListChecks,
     defaultSize: { width: 460, height: 480 },
     minSize: { width: 320, height: 300 },
@@ -202,7 +198,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   settings: {
     id: 'settings',
-    title: 'Settings',
+    title: 'SETTINGS.SYS',
     icon: SettingsIcon,
     defaultSize: { width: 600, height: 640 },
     minSize: { width: 340, height: 400 },
@@ -211,7 +207,7 @@ export const APP_REGISTRY: Record<string, AppDefinition> = {
   },
   admin: {
     id: 'admin',
-    title: 'Admin Console',
+    title: 'ADMIN.SYS',
     icon: ShieldCheck,
     routePattern: '/app/admin/*',
     buildPath: (params) => params.section ?? '/app/admin',

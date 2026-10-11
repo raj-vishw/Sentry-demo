@@ -33,7 +33,7 @@ describe('FlagSubmitForm', () => {
 
   it('requires a non-empty flag before submitting', async () => {
     const { onLog } = renderForm();
-    await userEvent.click(screen.getByRole('button', { name: 'Run' }));
+    await userEvent.click(screen.getByRole('button', { name: 'run' }));
     expect(await screen.findByText('Enter a flag before submitting.')).toBeInTheDocument();
     expect(challengeService.submitFlag).not.toHaveBeenCalled();
     expect(onLog).not.toHaveBeenCalled();
@@ -51,12 +51,12 @@ describe('FlagSubmitForm', () => {
     const { onSolved, onLog } = renderForm();
     // Avoids curly braces — user-event's type() treats "{..}" as key syntax.
     await userEvent.type(screen.getByLabelText('Flag'), 'correct-flag-value');
-    await userEvent.click(screen.getByRole('button', { name: 'Run' }));
+    await userEvent.click(screen.getByRole('button', { name: 'run' }));
 
     await vi.waitFor(() => expect(onSolved).toHaveBeenCalledWith(300));
     expect(challengeService.submitFlag).toHaveBeenCalledWith('chal-1', 'correct-flag-value');
     expect(onLog).toHaveBeenCalledWith(
-      expect.objectContaining({ tone: 'success', message: expect.stringContaining('+300 XP') }),
+      expect.objectContaining({ tone: 'success', message: expect.stringContaining('+300 xp') }),
     );
   });
 
@@ -71,10 +71,10 @@ describe('FlagSubmitForm', () => {
 
     const { onSolved, onLog } = renderForm();
     await userEvent.type(screen.getByLabelText('Flag'), 'wrong-flag-value');
-    await userEvent.click(screen.getByRole('button', { name: 'Run' }));
+    await userEvent.click(screen.getByRole('button', { name: 'run' }));
 
     await vi.waitFor(() =>
-      expect(onLog).toHaveBeenCalledWith(expect.objectContaining({ tone: 'error', message: 'Incorrect flag.' })),
+      expect(onLog).toHaveBeenCalledWith(expect.objectContaining({ tone: 'error', message: '✗ incorrect flag.' })),
     );
     expect(onSolved).not.toHaveBeenCalled();
   });

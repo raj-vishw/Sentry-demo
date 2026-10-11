@@ -1,5 +1,11 @@
 /**
- * Design tokens — "Digital Observatory / Glass Laboratory" identity.
+ * Design tokens — "Chamfered Ops" identity (formerly "Living Cyber OS" /
+ * "Digital Observatory" — same architecture; this pass unifies the OS
+ * accent with the public shell's "Terminal Noir" amber, so the whole
+ * product — public site and authenticated OS alike — shares one identity
+ * instead of two. Window chrome itself (Window.tsx) layers on top of
+ * these tokens with angular chamfered-corner panels via clip-path, not a
+ * token-level change, so it isn't duplicated here).
  * Single source of truth — change values here to re-theme the app.
  */
 @theme {
@@ -25,35 +31,40 @@
   --color-text-muted: #626b7d;
   --color-text-inverse: #08090c;
 
-  /* ---- Color: accents ("Midnight Aurora" — dark base, vivid glowing accents) ---- */
-  /* Primary "signal" — electric cyan, saturated and luminous. */
-  --color-accent: #00e5ff;
-  --color-accent-hover: #4ff0ff;
-  --color-accent-muted: #0a3a42;
-  --color-accent-soft: #072026;
+  /* ---- Color: accents ("Chamfered Ops" — dark base, glowing amber
+     accents; same family as the public shell's Terminal Noir, one
+     identity end-to-end) ---- */
+  /* Primary — amber, bright but not laser-saturated. */
+  --color-accent: #ffb347;
+  --color-accent-hover: #ffc670;
+  --color-accent-muted: rgb(255 179 71 / 0.2);
+  --color-accent-soft: rgb(255 179 71 / 0.12);
 
-  /* Secondary "discovery" — vivid magenta, used for highlights, completion
-     moments, and the admin/laboratory mode. */
+  /* Secondary — vivid magenta, used for highlights, completion
+     moments, and the admin/laboratory mode — kept distinct from the
+     amber primary so completion/discovery moments still read as a
+     different kind of event, not just "more accent." */
   --color-secondary: #d946ef;
   --color-secondary-hover: #e879f9;
   --color-secondary-muted: #3d1044;
   --color-secondary-soft: #230927;
 
-  /* Tertiary — bright amber, reserved for rare "discovery" emphasis (never
-     for routine UI) so it keeps its meaning. */
-  --color-tertiary: #ffb020;
+  /* Tertiary — reserved for rare "discovery" emphasis distinct from the
+     primary accent now that amber owns the primary role; a warm gold
+     keeps the same family without being mistaken for --color-accent. */
+  --color-tertiary: #e8c468;
 
   /* ---- Color: semantic ---- */
-  --color-success: #22e3a6;
-  --color-warning: #ffb020;
-  --color-error: #ff3d71;
-  --color-info: #00e5ff;
+  --color-success: #55d6a3;
+  --color-warning: #f4c66a;
+  --color-error: #ff737d;
+  --color-info: #ffb347;
 
   /* ---- Color: difficulty ---- */
-  --color-difficulty-easy: #22e3a6;
-  --color-difficulty-medium: #ffb020;
-  --color-difficulty-hard: #ff8a3d;
-  --color-difficulty-insane: #ff3d71;
+  --color-difficulty-easy: #55d6a3;
+  --color-difficulty-medium: #f4c66a;
+  --color-difficulty-hard: #ff9a5c;
+  --color-difficulty-insane: #ff737d;
 
   /* ---- Typography ---- */
   --font-sans:
@@ -63,11 +74,17 @@
     'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   /* ---- Radius ---- */
-  --radius-sm: 0.3rem;
-  --radius-md: 0.6rem;
-  --radius-lg: 1rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
   --radius-xl: 1.5rem;
   --radius-2xl: 2rem;
+
+  /* ---- Chamfer (angular cut-corner panels — Window chrome, dock tiles;
+     see Window.tsx's clip-path usage. A size, not a color/shape token,
+     kept here so every chamfered surface cuts the same amount.) ---- */
+  --chamfer-sm: 8px;
+  --chamfer-md: 14px;
 
   /* ---- Spacing (density-aware — see [data-density='compact'] below) ---- */
   --space-page-y: 2rem;
@@ -75,10 +92,11 @@
   --titlebar-h: 2.75rem;
 
   /* ---- Shadow / glow ---- */
-  --shadow-glow-accent: 0 0 36px -4px rgb(0 229 255 / 0.55);
-  --shadow-glow-secondary: 0 0 36px -4px rgb(217 70 239 / 0.55);
+  --shadow-glow-accent: 0 0 36px -4px rgb(255 179 71 / 0.5);
+  --shadow-glow-secondary: 0 0 36px -4px rgb(217 70 239 / 0.5);
   --shadow-card: 0 1px 1px rgb(0 0 0 / 0.3), 0 12px 32px -12px rgb(0 0 0 / 0.6);
   --shadow-glass: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 20px 60px -20px rgb(0 0 0 / 0.7);
+  --shadow-window: 0 24px 80px -8px rgb(0 0 0 / 0.5);
 
   /* ---- Motion ---- */
   --ease-signal: cubic-bezier(0.16, 1, 0.3, 1);
@@ -169,23 +187,23 @@
   --color-text-inverse: #f8fafc;
 
   /* ---- Color: accents (deepened for contrast on light surfaces) ---- */
-  --color-accent: #0891b2;
-  --color-accent-hover: #0e7490;
-  --color-accent-muted: #a5f3fc;
-  --color-accent-soft: #ecfeff;
+  --color-accent: #b45309;
+  --color-accent-hover: #92400e;
+  --color-accent-muted: #fde8d0;
+  --color-accent-soft: #fef6ec;
 
   --color-secondary: #a21caf;
   --color-secondary-hover: #86198f;
   --color-secondary-muted: #f5d0fe;
   --color-secondary-soft: #fdf4ff;
 
-  --color-tertiary: #b45309;
+  --color-tertiary: #a16207;
 
   /* ---- Color: semantic ---- */
   --color-success: #059669;
   --color-warning: #b45309;
   --color-error: #e11d48;
-  --color-info: #0891b2;
+  --color-info: #b45309;
 
   /* ---- Color: difficulty ---- */
   --color-difficulty-easy: #059669;
@@ -194,7 +212,7 @@
   --color-difficulty-insane: #e11d48;
 
   /* ---- Shadow / glow (lighter — a dark-mode-strength blur reads too heavy on white) ---- */
-  --shadow-glow-accent: 0 0 28px -6px rgb(8 145 178 / 0.35);
+  --shadow-glow-accent: 0 0 28px -6px rgb(180 83 9 / 0.35);
   --shadow-glow-secondary: 0 0 28px -6px rgb(162 28 175 / 0.35);
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.08), 0 14px 32px -14px rgb(15 23 42 / 0.24);
   --shadow-glass: 0 1px 0 0 rgb(255 255 255 / 0.9) inset, 0 20px 50px -20px rgb(15 23 42 / 0.28);
@@ -209,54 +227,104 @@
 }
 
 /**
- * Third theme scope — "public shell." Applied as a class (not :root) on
- * PublicLayout/AuthLayout/LandingPage's own root div, same plain-CSS
- * re-declaration technique as the light-mode block above, so every
- * existing component reading var(--color-*) re-themes for free with zero
- * component edits. Deliberately NOT admin-customizable (unlike the
- * dark/light tokens, which AuthGate.tsx's applyBranding() can override via
- * an inline style on <html>) — a class on a descendant div always wins
- * over that inline style for anything inside it, via ordinary custom-
- * property inheritance, so the public marketing/docs/auth shell keeps
- * one fixed identity regardless of per-instance branding. Only the
+ * Third theme scope — "public shell," identity "Terminal Noir." Applied as
+ * a class (not :root) on PublicLayout/AuthLayout/LandingPage's own root
+ * div, same plain-CSS re-declaration technique as the light-mode block
+ * above, so every existing component reading var(--color-*) re-themes for
+ * free with zero component edits. Deliberately NOT admin-customizable
+ * (unlike the dark/light tokens, which AuthGate.tsx's applyBranding() can
+ * override via an inline style on <html>) — a class on a descendant div
+ * always wins over that inline style for anything inside it, via ordinary
+ * custom-property inheritance, so the public marketing/docs/auth shell
+ * keeps one fixed identity regardless of per-instance branding. Only the
  * authenticated OS (never wrapped in this class) reflects admin branding.
  *
- * Flat/black/emerald — no blur, no glow. --color-glass-bg/-strong are
- * fully opaque on purpose: .glass-panel's backdrop-filter: blur() has
- * nothing translucent left to blur through, so the blur becomes a no-op
- * without touching that shared class.
+ * Restrained terminal aesthetic, deliberately distinct from the OS shell's
+ * "Living Cyber OS" identity: near-black surfaces, a warm amber accent
+ * (not the OS's cyan), and monospace as the PRIMARY typeface (not just for
+ * technical values) — both --font-sans and --font-display are overridden
+ * to JetBrains Mono here so every public-page heading/body text picks it
+ * up automatically. No blur, no glow — --color-glass-bg/-strong are fully
+ * opaque on purpose: .glass-panel's backdrop-filter: blur() has nothing
+ * translucent left to blur through, so the blur becomes a no-op without
+ * touching that shared class.
+ *
+ * Has its own light variant (`.theme-public-light`, combined with this
+ * class — never used alone) toggled independently of the OS's dark/light
+ * preference by `usePublicThemeStore` — see PublicThemeToggle.tsx.
  */
 .theme-public {
-  --color-bg: #000000;
-  --color-bg-raised: #09090b;
-  --color-surface: #09090b;
-  --color-surface-elevated: #18181b;
-  --color-surface-hover: #27272a;
-  --color-border: rgb(255 255 255 / 0.1);
-  --color-border-strong: rgb(255 255 255 / 0.18);
+  --color-bg: #0a0a0a;
+  --color-bg-raised: #111110;
+  --color-surface: #0f0f0d;
+  --color-surface-elevated: #141412;
+  --color-surface-hover: #1a1a17;
+  --color-border: #1f1f1f;
+  --color-border-strong: #2a2a26;
 
-  --color-glass-bg: #09090b;
-  --color-glass-bg-strong: #18181b;
-  --color-glass-border: rgb(255 255 255 / 0.1);
-  --color-glass-border-strong: rgb(255 255 255 / 0.18);
+  --color-glass-bg: #0f0f0d;
+  --color-glass-bg-strong: #141412;
+  --color-glass-border: #1f1f1f;
+  --color-glass-border-strong: #2a2a26;
   --color-glass-highlight: rgb(255 255 255 / 0.04);
 
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
-  --color-text-inverse: #000000;
+  --color-text-primary: #e8e8e3;
+  --color-text-secondary: #9a9a94;
+  --color-text-muted: #6b6b66;
+  --color-text-inverse: #0a0a0a;
 
-  --color-accent: #34d399;
-  --color-accent-hover: #6ee7b7;
-  --color-accent-muted: rgb(16 185 129 / 0.2);
-  --color-accent-soft: rgb(16 185 129 / 0.1);
-  --color-secondary: #6ee7b7;
-  --color-secondary-hover: #a7f3d0;
-  --color-secondary-muted: rgb(16 185 129 / 0.2);
-  --color-secondary-soft: rgb(16 185 129 / 0.1);
+  --color-accent: #ffb347;
+  --color-accent-hover: #ffc670;
+  --color-accent-muted: rgb(255 179 71 / 0.2);
+  --color-accent-soft: rgb(255 179 71 / 0.12);
+  --color-secondary: #d9922f;
+  --color-secondary-hover: #ffcf85;
+  --color-secondary-muted: rgb(217 146 47 / 0.2);
+  --color-secondary-soft: rgb(217 146 47 / 0.1);
+
+  --font-sans: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-display: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --radius-sm: 0.2rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.4rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.625rem;
 
   --shadow-glow-accent: none;
   --shadow-glow-secondary: none;
   --shadow-glass: none;
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+.theme-public.theme-public-light {
+  --color-bg: #f7f4ee;
+  --color-bg-raised: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f1ede3;
+  --color-surface-hover: #ece7da;
+  --color-border: #e3ddd0;
+  --color-border-strong: #c9c2b2;
+
+  --color-glass-bg: #ffffff;
+  --color-glass-bg-strong: #f1ede3;
+  --color-glass-border: #e3ddd0;
+  --color-glass-border-strong: #c9c2b2;
+  --color-glass-highlight: rgb(21 19 15 / 0.03);
+
+  --color-text-primary: #15130f;
+  --color-text-secondary: #4a443a;
+  --color-text-muted: #9a9284;
+  --color-text-inverse: #f7f4ee;
+
+  --color-accent: #d1452b;
+  --color-accent-hover: #b93a23;
+  --color-accent-muted: rgb(209 69 43 / 0.15);
+  --color-accent-soft: rgb(209 69 43 / 0.1);
+  --color-secondary: #8a6a4a;
+  --color-secondary-hover: #6b4f36;
+  --color-secondary-muted: rgb(138 106 74 / 0.15);
+  --color-secondary-soft: rgb(138 106 74 / 0.08);
+
+  --shadow-card: 0 1px 2px rgb(21 19 15 / 0.08), 0 8px 24px -14px rgb(21 19 15 / 0.16);
 }

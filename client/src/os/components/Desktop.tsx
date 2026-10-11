@@ -230,7 +230,7 @@ export function Desktop() {
           style={{
             background:
               'radial-gradient(60% 50% at 10% 20%, color-mix(in srgb, #ff2bd6 35%, transparent), transparent), ' +
-              'radial-gradient(55% 45% at 90% 15%, color-mix(in srgb, #00e5ff 32%, transparent), transparent), ' +
+              'radial-gradient(55% 45% at 90% 15%, color-mix(in srgb, #45d9f5 32%, transparent), transparent), ' +
               'radial-gradient(70% 60% at 50% 100%, color-mix(in srgb, #7c3aed 28%, transparent), transparent)',
           }}
         />
@@ -271,7 +271,7 @@ export function Desktop() {
             className={cn(
               'absolute flex w-20 flex-col items-center gap-1.5 rounded-[var(--radius-md)] p-2 text-center outline-none',
               'focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]',
-              selected === app.id ? 'bg-[var(--color-accent)]/15' : 'hover:bg-white/5',
+              selected === app.id ? 'bg-[var(--color-accent)]/15' : 'hover:bg-[var(--color-glass-highlight)]',
             )}
             style={{ left: pos.x, top: pos.y, touchAction: 'none' }}
           >

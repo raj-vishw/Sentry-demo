@@ -51,7 +51,7 @@ export function AdminLoginPage() {
     <AuthLayout
       title="Operator Access"
       subtitle="Restricted entry point. Unauthorized attempts are logged."
-      eyebrow="Sentry OS · Admin"
+      eyebrow="// sentry · admin"
       aside={<SystemStatusPanel />}
     >
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">

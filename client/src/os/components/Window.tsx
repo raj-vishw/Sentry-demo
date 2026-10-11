@@ -18,6 +18,19 @@ const TOP_MARGIN = 56 + 32;
 const EDGE_THRESHOLD = 28;
 const CORNER_ZONE = 120;
 
+/**
+ * "Chamfered Ops" window chrome: angular cut corners (top-left on the
+ * titlebar, bottom-right on the content area — the other two stay
+ * square), not rounded ones. Implemented as clip-path on purely
+ * decorative/opaque layers, never on the outer motion.div itself or on
+ * any interactive element — the resize handles and drag/focus hit-areas
+ * below are completely unaffected by these shapes.
+ */
+const CHAMFER = 'var(--chamfer-md)';
+const FRAME_CLIP = `polygon(${CHAMFER} 0, 100% 0, 100% calc(100% - ${CHAMFER}), calc(100% - ${CHAMFER}) 100%, 0 100%, 0 ${CHAMFER})`;
+const TITLEBAR_CLIP = `polygon(${CHAMFER} 0, 100% 0, 100% 100%, 0 100%, 0 ${CHAMFER})`;
+const CONTENT_CLIP = `polygon(0 0, 100% 0, 100% calc(100% - ${CHAMFER}), calc(100% - ${CHAMFER}) 100%, 0 100%)`;
+
 function computeSnapZone(x: number, y: number): SnapZone {
   const w = window.innerWidth;
   const h = window.innerHeight;
@@ -227,9 +240,7 @@ export function Window({
       role="dialog"
       aria-label={win.title}
       className={cn(
-        'fixed flex flex-col overflow-hidden rounded-[var(--radius-lg)] border',
-        'glass-panel-strong shadow-[0_24px_60px_-16px_rgb(0_0_0_/_0.55)]',
-        isFocused ? 'border-[var(--color-glass-border-strong)]' : 'border-[var(--color-glass-border)]',
+        'fixed flex flex-col overflow-hidden shadow-[var(--shadow-window)]',
         win.minimized && 'pointer-events-none',
       )}
       style={style}
@@ -247,12 +258,38 @@ export function Window({
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       onPointerDownCapture={() => !isFocused && focusWindow(win.id)}
     >
+      {/* Decorative chamfered frame — border ring + panel fill. Purely
+          visual (pointer-events-none), layered behind the titlebar/content/
+          resize-handle hit-areas below so none of their interaction logic
+          needs to know about the angular shape. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          clipPath: FRAME_CLIP,
+          background: isFocused ? 'var(--color-accent)' : 'var(--color-glass-border-strong)',
+          opacity: isFocused ? 0.55 : 1,
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-[1px]"
+        style={{ clipPath: FRAME_CLIP, background: 'var(--color-glass-bg-strong)' }}
+      />
+      {isFocused && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-0 left-0 top-0 w-[3px]"
+          style={{ background: 'var(--color-accent)', boxShadow: '0 0 10px var(--color-accent)' }}
+        />
+      )}
+
       <div
         className={cn(
-          'flex h-[var(--titlebar-h)] shrink-0 items-center gap-2 border-b px-3',
-          isFocused ? 'border-[var(--color-glass-border-strong)]' : 'border-[var(--color-glass-border)]',
+          'relative flex h-[var(--titlebar-h)] shrink-0 items-center gap-2 border-b px-3',
+          isFocused ? 'border-[var(--color-accent)]/30' : 'border-[var(--color-glass-border)]',
         )}
-        style={{ cursor: win.maximized || isMobile ? 'default' : 'grab', touchAction: 'none' }}
+        style={{ cursor: win.maximized || isMobile ? 'default' : 'grab', touchAction: 'none', clipPath: TITLEBAR_CLIP }}
         onPointerDown={onTitlePointerDown}
         onPointerMove={onTitlePointerMove}
         onPointerUp={onTitlePointerUp}
@@ -312,7 +349,11 @@ export function Window({
       {/* Opaque, not glass — content here (Cards etc.) carries its own glass
           treatment, and stacking a second backdrop-filter on top of the
           window's would blur an already-blurred layer into visual mud. */}
-      <div ref={contentRef} className="min-h-0 flex-1 overflow-y-auto bg-[var(--color-bg-raised)]">
+      <div
+        ref={contentRef}
+        className="relative min-h-0 flex-1 overflow-y-auto bg-[var(--color-bg-raised)]"
+        style={{ clipPath: CONTENT_CLIP }}
+      >
         <Suspense fallback={<ObservatoryLoader label="Loading" className="p-10" />}>
           <app.component windowId={win.id} params={win.params} isCompact={isCompact} />
         </Suspense>
